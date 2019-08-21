@@ -1,82 +1,91 @@
 <template>
-    <div id="app">
-        <el-container>
-            <el-header><img alt="Vue logo"
-                            src="https://www.irisnet.org/dist/irisnet_logo.png?4386a8f8710c9076ff3bb63fc78ef4e7">
-            </el-header>
-            <el-main style="margin: 80px auto 0 auto;width: 600px;">
-                <el-tabs type="border-card" @tab-click="tabClick">
-                    <el-tab-pane label="Swap">
-                        <div class="tab_div">
-                            <el-input v-model="swapInput" style="width: 50%" @input="setOutputAmount"/>
-                            <Dropdown v-model="swapInputDropdown" style="width: 100px" :itemData="data"
-                                      :change="changeInput"/>
-                        </div>
-                        <div class="tab_div">
-                            <el-input v-model="swapOutput" style="width: 50%" @input="setInputAmount"/>
-                            <Dropdown style="width: 100px" :itemData="data" :change="changeOutput"
-                                      v-model="swapOutputDropdown"/>
-                        </div>
-                        <div class="tab_div" v-if="exchangeRate !== ''">
-                            <el-tag class="el-tag">
-                                <p><span>Exchange Rate:</span><span>{{exchangeRate}}</span></p>
-                            </el-tag>
-                        </div>
-                        <div class="tab_div">
-                            <el-button type="primary" round style="width: 35%">Swap</el-button>
-                        </div>
-                    </el-tab-pane>
-                    <el-tab-pane label="Send">
-                        <div class="tab_div">
-                            <el-input v-model="swapInput" style="width: 50%" @input="setOutputAmount"/>
-                            <Dropdown v-model="swapInputDropdown" style="width: 100px" :itemData="data"
-                                      :change="changeInput"/>
-                        </div>
-                        <div class="tab_div">
-                            <el-input v-model="swapOutput" style="width: 50%" @input="setInputAmount"/>
-                            <Dropdown style="width: 100px" :itemData="data" :change="changeOutput"
-                                      v-model="swapOutputDropdown"/>
-                        </div>
-                        <div class="tab_div">
-                            <el-input style="width: 72%" placeholder="Recipient Address"/>
-                        </div>
-                        <div class="tab_div" v-if="exchangeRate !== ''">
-                            <el-tag class="el-tag">
-                                <p><span>Exchange Rate:</span><span>{{exchangeRate}}</span></p>
-                            </el-tag>
-                        </div>
-                        <div class="tab_div">
-                            <el-button type="primary" round style="width: 35%">Swap</el-button>
-                        </div>
-                    </el-tab-pane>
-                    <el-tab-pane label="Pool">
-                        <div class="tab_div">
-                            <Dropdown style="width: 72%" :itemData="s_data" :change="changePoolMethod"/>
-                        </div>
-                        <div class="tab_div">
-                            <el-input v-model="poolIrisAmt" style="width: 50%"/>
-                            <Dropdown style="width: 100px" :itemData="i_data" :change="emptyFun" disabled/>
-                        </div>
-                        <div class="tab_div">
-                            <el-input v-model="poolTokenAmt" style="width: 50%"/>
-                            <Dropdown style="width: 100px" :itemData="data" :change="computeLiquidity"
-                                      v-model="poolTokenDropdown"/>
-                        </div>
-                        <div class="tab_div" v-if="poolState !== ''">
-                            <el-tag class="el-tag">
-                                <p><span>Exchange Rate:</span><span>{{poolState.rate}}</span></p>
-                                <p><span>Current Pool Size:</span><span>{{poolState.size}}</span></p>
-                                <p><span>Your Pool Share (%):</span><span>{{poolState.share}}</span></p>
-                            </el-tag>
-                        </div>
-                        <div class="tab_div">
-                            <el-button type="primary" style="width: 35%" round>{{methodDesc}}</el-button>
-                        </div>
-                    </el-tab-pane>
-                </el-tabs>
-            </el-main>
-        </el-container>
-    </div>
+<div id="app">
+    <el-container>
+        <el-header><img alt="Vue logo"
+                        src="https://www.irisnet.org/dist/irisnet_logo.png?4386a8f8710c9076ff3bb63fc78ef4e7">
+        </el-header>
+        <el-main style="margin: 80px auto 0 auto;width: 600px;">
+            <el-tabs type="border-card" @tab-click="tabClick">
+                <el-tab-pane label="Swap">
+                    <div class="tab_div">
+                        <el-input v-model="swapInput" style="width: 50%" @input="setOutputAmount"/>
+                        <Dropdown v-model="swapInputDropdown" style="width: 100px" :itemData="data"
+                                  :change="changeInput"/>
+                    </div>
+                    <div class="tab_div">
+                        <el-input v-model="swapOutput" style="width: 50%" @input="setInputAmount"/>
+                        <Dropdown style="width: 100px" :itemData="data" :change="changeOutput"
+                                  v-model="swapOutputDropdown"/>
+                    </div>
+                    <div class="tab_div" v-if="exchangeRate !== ''">
+                        <el-tag class="el-tag">
+                            <p><span>Exchange Rate:</span><span>{{exchangeRate}}</span></p>
+                        </el-tag>
+                    </div>
+                    <div class="tab_div">
+                        <el-button type="primary" round style="width: 35%">Swap</el-button>
+                    </div>
+                </el-tab-pane>
+                <el-tab-pane label="Send">
+                    <div class="tab_div">
+                        <el-input v-model="swapInput" style="width: 50%" @input="setOutputAmount"/>
+                        <Dropdown v-model="swapInputDropdown" style="width: 100px" :itemData="data"
+                                  :change="changeInput"/>
+                    </div>
+                    <div class="tab_div">
+                        <el-input v-model="swapOutput" style="width: 50%" @input="setInputAmount"/>
+                        <Dropdown style="width: 100px" :itemData="data" :change="changeOutput"
+                                  v-model="swapOutputDropdown"/>
+                    </div>
+                    <div class="tab_div">
+                        <el-input style="width: 72%" placeholder="Recipient Address"/>
+                    </div>
+                    <div class="tab_div" v-if="exchangeRate !== ''">
+                        <el-tag class="el-tag">
+                            <p><span>Exchange Rate:</span><span>{{exchangeRate}}</span></p>
+                        </el-tag>
+                    </div>
+                    <div class="tab_div">
+                        <el-button type="primary" round style="width: 35%">Swap</el-button>
+                    </div>
+                </el-tab-pane>
+                <el-tab-pane label="Pool">
+                    <div>
+                    <el-tabs @tab-click="poolTabClick">
+                        <el-tab-pane label="Add Liquidity">
+                            <div class="tab_div">
+                                <el-input v-model="poolIrisAmt" style="width: 50%" @input="addLiquidityInput"/>
+                                <Dropdown style="width: 100px" :itemData="i_data" :change="emptyFun" disabled/>
+                            </div>
+                            <div class="tab_div">
+                                <el-input v-model="poolTokenAmt" style="width: 50%"/>
+                                <Dropdown style="width: 100px" :itemData="filterData" :change="computeAddLiquidity" v-model="poolTokenDropdown"/></div>
+                        </el-tab-pane>
+                        <el-tab-pane label="Remove Liquidity">
+                            <div class="tab_div">
+                                <el-input v-model="poolLiquidityAmt" @input="removeLiquidityInput" style="width: 50%"/>
+                                <Dropdown style="width: 100px" :itemData="poolLiquidity" :change="computeRemoveLiquidity" v-model="poolLiquidityDropdown"/></div>
+                            <div class="tab_div">
+                                <el-input readonly v-model="poolLiquidityOutput" style="width: 72%" placeholder="Output"/>
+                            </div>
+                        </el-tab-pane>
+                    </el-tabs>
+                    </div>
+                    <div class="tab_div" style="margin-top: 0px" v-if="poolState !== ''">
+                        <el-tag class="el-tag">
+                            <p><span>Exchange Rate:</span><span>{{poolState.rate}}</span></p>
+                            <p><span>Current Pool Size:</span><span>{{poolState.size}}</span></p>
+                            <p><span>Your Pool Share (%):</span><span>{{poolState.share}}</span></p>
+                        </el-tag>
+                    </div>
+                    <div class="tab_div">
+                        <el-button type="primary" style="width: 35%" round>{{methodDesc}}</el-button>
+                    </div>
+                </el-tab-pane>
+            </el-tabs>
+        </el-main>
+    </el-container>
+</div>
 
 </template>
 
@@ -101,6 +110,7 @@
         data() {
             return {
                 data: [],
+                filterData: [],
                 decimals: {},
                 s_data: [{
                     value: AddLiquidity,
@@ -123,13 +133,18 @@
                 poolState: "",
                 poolIrisAmt: 0,
                 poolTokenAmt: 0,
+                poolLiquidity: [],
+                poolLiquidityAmt: 0,
+                poolLiquidityOutput: "",
+                poolLiquidityDropdown: "",
             }
         },
         watch: {
             data() {
                 this.swapInputDropdown = this.data[0].value;
                 this.swapOutputDropdown = this.data[0].value;
-                this.poolTokenDropdown = this.data[0].value;
+                this.poolTokenDropdown = this.poolLiquidity[0].value;
+                this.poolLiquidityDropdown = this.poolLiquidity[0].value;
             }
         },
         methods: {
@@ -138,11 +153,20 @@
                     res.forEach((item) => {
                         let token = item.base_token;
                         let uDenom = `u-${token.id}`;
-                        this.data.push({
+                        let option = {
                             value: uDenom,
                             label: token.symbol.toUpperCase(),
-                        });
-                        this.decimals[uDenom] = token.decimal
+                        };
+                        this.data.push(option);
+                        this.decimals[uDenom] = token.decimal;
+
+                        if (token.id !== "iris"){
+                            this.poolLiquidity.push({
+                                value: uDenom,
+                                label: `u-${token.symbol}`.toUpperCase(),
+                            });
+                            this.filterData.push(option);
+                        }
                     });
                 });
             },
@@ -152,10 +176,19 @@
                 this.swapOutput = 0;
                 this.swapOutputDropdown = "";
                 this.exchangeRate = "";
-                this.poolTokenDropdown = "";
+                this.poolTabClick()
+            },
+            poolTabClick(tab){
                 this.poolState = "";
                 this.poolIrisAmt = 0;
                 this.poolTokenAmt = 0;
+                this.poolLiquidityAmt = 0;
+                this.poolLiquidityOutput = 0;
+                let method = AddLiquidity;
+                if(tab){
+                    method = tab.label
+                }
+                this.methodDesc = method
             },
             changeInput(denom) {
                 this.swapInputDropdown = denom;
@@ -187,7 +220,7 @@
                 if (inputDenom === "u-iris" && outputDenom === "u-iris") {
                     return;
                 }
-                if (outputAmt === 0) {
+                if (!Number.isInteger(outputAmt) || outputAmt === 0) {
                     return;
                 }
                 if (inputDenom === "u-iris") {
@@ -222,7 +255,7 @@
                 if (inputDenom === "u-iris" && outputDenom === "u-iris") {
                     return;
                 }
-                if (inputAmt === 0) {
+                if (!Number.isInteger(inputAmt) || inputAmt === 0) {
                     return;
                 }
                 if (inputDenom === "u-iris") {
@@ -243,6 +276,10 @@
                 }
             },
             showRate(inputAmt, inputDenom, outputAmt, outputDenom) {
+                if(!Number.isInteger(inputAmt) || !Number.isInteger(outputAmt)
+                    || inputAmt ===0 || outputAmt === 0){
+                    return
+                }
                 if (inputDenom === "u-iris") {
                     let rate = inputAmt / outputAmt;
                     this.exchangeRate = `1 ${getMainDenom(outputDenom)} = ${rate} ${getMainDenom(inputDenom)}`;
@@ -254,11 +291,12 @@
                     this.exchangeRate = `1 ${getMainDenom(outputDenom)} = ${rate} ${getMainDenom(inputDenom)}`;
                 }
             },
-            changePoolMethod(methodDesc) {
-                this.methodDesc = methodDesc
+            addLiquidityInput(){
+                this.computeAddLiquidity(this.poolTokenDropdown);
             },
-            computeLiquidity(denom) {
-                if (denom === "u-iris") {
+            computeAddLiquidity(denom) {
+                this.poolTokenDropdown = denom;
+                if(denom === 'u-iris'){
                     return
                 }
                 client.getReservePool(denom).then(data => {
@@ -276,16 +314,54 @@
                     let tokenAmt = token.amount / Math.pow(10, this.decimals[tokenUdenom]);
                     let irisAmt = iris.amount / Math.pow(10, this.decimals[irisUdenom]);
                     this.poolState = {
-                      rate: `1 ${tokenMainDenom} = ${irisAmt / tokenAmt}`,
-                      size: `${irisAmt} ${irisMainDenom} + ${tokenAmt} ${tokenMainDenom}`,
+                        rate: `1 ${tokenMainDenom} = ${irisAmt / tokenAmt}`,
+                        size: `${irisAmt} ${irisMainDenom} + ${tokenAmt} ${tokenMainDenom}`,
                     };
-                    if (this.poolIrisAmt === 0){
+                    if (this.poolIrisAmt === 0) {
                         return;
                     }
                     // compute deposted token
                     let deltaIris = this.poolIrisAmt * Math.pow(10, this.decimals[irisUdenom]);
-                    let deltaToken = (deltaIris / iris.amount) *  token.amount;
+                    let deltaToken = (deltaIris / iris.amount) * token.amount + 1;
                     this.poolTokenAmt = deltaToken / Math.pow(10, this.decimals[tokenUdenom])
+                });
+            },
+            removeLiquidityInput(){
+                this.computeRemoveLiquidity(this.poolLiquidityDropdown);
+            },
+            computeRemoveLiquidity(denom) {
+                this.poolLiquidityDropdown = denom;
+                let parent = this;
+                client.getReservePool(denom).then(data => {
+                    if (!data) {
+                        return;
+                    }
+                    let token = data.token;
+                    let iris = data.iris;
+
+
+                    let tokenUdenom = minTokenToUdenom(token.denom);
+                    let irisUdenom = minTokenToUdenom(iris.denom);
+                    let tokenMainDenom = getMainDenom(tokenUdenom);
+                    let irisMainDenom = getMainDenom(irisUdenom);
+
+                    let reserveTokenAmt = token.amount / Math.pow(10, this.decimals[tokenUdenom]);
+                    let reserveIrisAmt = iris.amount / Math.pow(10, this.decimals[irisUdenom]);
+
+                    let liquidityAmt = data.liquidity.amount;
+                    let deltaliquidity = parent.poolLiquidityAmt * Math.pow(10, parent.decimals[irisUdenom]);
+                    let delta = deltaliquidity / liquidityAmt;
+
+                    // compute deposted token
+                    let deltaIris = delta * iris.amount;
+                    let deltaToken = delta * token.amount;
+                    let tokenAmt = deltaToken / Math.pow(10, parent.decimals[tokenUdenom]);
+                    let irisAmt = deltaIris / Math.pow(10, parent.decimals[irisUdenom]);
+                    parent.poolLiquidityOutput = `${irisAmt} ${irisMainDenom} + ${tokenAmt} ${tokenMainDenom}`;
+                    parent.poolState = {
+                        rate: `1 ${tokenMainDenom} = ${reserveIrisAmt / reserveTokenAmt}`,
+                        size: `${reserveIrisAmt} ${irisMainDenom} + ${reserveTokenAmt} ${tokenMainDenom}`,
+                    };
                 });
             },
             emptyFun() {
@@ -325,7 +401,7 @@
 
     .el-tabs__nav-scroll {
         overflow: hidden;
-        margin-left: 200px;
+        margin-left: 150px;
     }
 
     .el-tag {
