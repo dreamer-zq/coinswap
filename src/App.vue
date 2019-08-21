@@ -181,9 +181,7 @@
             },
             tabClick() {
                 this.swapInput = 0;
-                this.swapInputDropdown = "";
                 this.swapOutput = 0;
-                this.swapOutputDropdown = "";
                 this.exchangeRate = "";
                 this.poolTabClick()
             },
@@ -232,6 +230,7 @@
                 if (!Number.isInteger(outputAmt) || outputAmt === 0) {
                     return;
                 }
+
                 if (inputDenom === "u-iris") {
                     client.tradeIrisForExactTokens(outputDenom, outputAmt).then(data => {
                         this.swapInput = data.toNumber() / Math.pow(10, this.decimals[inputDenom]);
@@ -248,10 +247,6 @@
                         this.showRate(data.toNumber(), inputDenom, outputAmt, outputDenom)
                     });
 
-                }
-                if (outputAmt > 0 && this.swapInput > 0) {
-                    let rate = this.swapInput / outputAmt;
-                    this.exchangeRate = `1 ${getMainDenom(outputDenom)} = ${rate} ${getMainDenom(inputDenom)}`;
                 }
             },
             setOutputAmount() {
@@ -289,6 +284,8 @@
                     || inputAmt ===0 || outputAmt === 0){
                     return
                 }
+                inputAmt = inputAmt / Math.pow(10, this.decimals[inputDenom]);
+                outputAmt = outputAmt / Math.pow(10, this.decimals[outputDenom]);
                 if (inputDenom === "u-iris") {
                     let rate = inputAmt / outputAmt;
                     this.exchangeRate = `1 ${getMainDenom(outputDenom)} = ${rate} ${getMainDenom(inputDenom)}`;
