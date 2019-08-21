@@ -95,6 +95,15 @@
 
     const AddLiquidity = 'Add Liquidity';
     const RemoveLiquidity = 'Remove Liquidity';
+    // const network = {
+    //     blockchain: "iris",
+    //     chainId: "irishub"
+    // };
+    // let mathExt = null;
+    // initMathExtension().then((extension) => {
+    //     mathExt = extension;
+    //     loginWallet()
+    // });
 
     let client = new IrisClient("10.1.4.124:1317", {
         network: "testnet",
@@ -387,6 +396,25 @@
         let domain = denom.replace("-min", "");
         return `u-${domain}`
     }
+    // async function initMathExtension(){
+    //     let tries = 10;
+    //     for (let i = 0; i < tries; i++) {
+    //         let loaded = await new Promise((resolve) => {
+    //             setTimeout(function(){
+    //                 resolve(typeof window.mathExtension != 'undefined');
+    //             }, 100);
+    //         });
+    //         if(loaded) return window.mathExtension;
+    //     }
+    //     return false;
+    // }
+    // function loginWallet() {
+    //     mathExt.getIdentity(network).then(identity => {
+    //         console.log(identity);
+    //     }).catch(e => {
+    //         console.log(e);
+    //     })
+    // }
 </script>
 <style>
     #app {
