@@ -365,7 +365,7 @@
                     let irisAmt = deltaIris / Math.pow(10, parent.decimals[irisUdenom]);
                     parent.poolLiquidityOutput = `${irisAmt} ${irisMainDenom} + ${tokenAmt} ${tokenMainDenom}`;
                     parent.poolState = {
-                        rate: `1 ${tokenMainDenom} = ${reserveIrisAmt / reserveTokenAmt}`,
+                        rate: `1 ${tokenMainDenom} = ${reserveIrisAmt / reserveTokenAmt} ${irisMainDenom}`,
                         size: `${reserveIrisAmt} ${irisMainDenom} + ${reserveTokenAmt} ${tokenMainDenom}`,
                     };
                 });
