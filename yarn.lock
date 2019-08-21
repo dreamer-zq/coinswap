@@ -7327,9 +7327,9 @@ schema-utils@^1.0.0:
     ajv-errors "^1.0.0"
     ajv-keywords "^3.1.0"
 
-"sdk-js@git+https://github.com/zhiqiang-bianjie/sdk-js.git#develop":
+"sdk-js@git+https://github.com/zhiqiang-bianjie/sdk-js.git#asset":
   version "1.0.0"
-  resolved "git+https://github.com/zhiqiang-bianjie/sdk-js.git#00ba8f476c1eeb35967a4304742989f5281fac12"
+  resolved "git+https://github.com/zhiqiang-bianjie/sdk-js.git#0f84632f1de23926cc3c3c751bdaa18b731e503b"
   dependencies:
     axios "^0.19.0"
     bignumber.js "^9.0.0"
