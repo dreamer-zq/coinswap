@@ -338,7 +338,7 @@
                     let tokenAmt = token.amount / Math.pow(10, this.decimals[tokenUdenom]);
                     let irisAmt = iris.amount / Math.pow(10, this.decimals[irisUdenom]);
                     this.poolState = {
-                        rate: `1 ${tokenMainDenom} = ${irisAmt / tokenAmt}`,
+                        rate: `1 ${tokenMainDenom} = ${irisAmt / tokenAmt} ${irisMainDenom}`,
                         size: `${irisAmt} ${irisMainDenom} + ${tokenAmt} ${tokenMainDenom}`,
                     };
                     if (this.poolIrisAmt === 0) {
@@ -348,7 +348,7 @@
                     let deltaIris = this.poolIrisAmt * Math.pow(10, this.decimals[irisUdenom]);
                     let deltaToken = (deltaIris / iris.amount) * token.amount + 1;
                     this.poolTokenAmt = deltaToken / Math.pow(10, this.decimals[tokenUdenom])
-                }).then(() => {
+                }).catch(() => {
                     this.showError(`liquidity pool ${denom} not exist !`);
                 });
                 this.clearError();
