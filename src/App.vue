@@ -82,6 +82,9 @@
                         <el-button type="primary" style="width: 35%" round>{{methodDesc}}</el-button>
                     </div>
                 </el-tab-pane>
+                <div class="tab_div" v-if="errorMsg !== ''">
+                    <el-tag type="danger">{{errorMsg}}</el-tag>
+                </div>
             </el-tabs>
         </el-main>
     </el-container>
@@ -132,6 +135,7 @@
                     value: 'iris-atto',
                     label: 'IRIS',
                 }],
+                errorMsg: "",
                 swapInput: 0,
                 swapInputDropdown: "",
                 swapOutput: 0,
@@ -177,6 +181,8 @@
                             this.filterData.push(option);
                         }
                     });
+                }).catch(() => {
+                    this.showError("init page error!")
                 });
             },
             tabClick() {
@@ -184,6 +190,12 @@
                 this.swapOutput = 0;
                 this.exchangeRate = "";
                 this.poolTabClick()
+            },
+            showError(message){
+                this.errorMsg = message;
+            },
+            clearError(){
+                this.errorMsg = '';
             },
             poolTabClick(tab){
                 this.poolState = "";
@@ -195,7 +207,8 @@
                 if(tab){
                     method = tab.label
                 }
-                this.methodDesc = method
+                this.methodDesc = method;
+                this.clearError();
             },
             changeInput(denom) {
                 this.swapInputDropdown = denom;
@@ -228,6 +241,7 @@
                     return;
                 }
                 if (!Number.isInteger(outputAmt) || outputAmt === 0) {
+                    this.showError("invalid number!");
                     return;
                 }
 
@@ -248,6 +262,7 @@
                     });
 
                 }
+                this.clearError();
             },
             setOutputAmount() {
                 let inputDenom = this.swapInputDropdown;
@@ -260,6 +275,7 @@
                     return;
                 }
                 if (!Number.isInteger(inputAmt) || inputAmt === 0) {
+                    this.showError("invalid number!");
                     return;
                 }
                 if (inputDenom === "u-iris") {
@@ -278,10 +294,12 @@
                         this.showRate(inputAmt, inputDenom, data.toNumber(), outputDenom)
                     });
                 }
+                this.clearError();
             },
             showRate(inputAmt, inputDenom, outputAmt, outputDenom) {
                 if(!Number.isInteger(inputAmt) || !Number.isInteger(outputAmt)
                     || inputAmt ===0 || outputAmt === 0){
+                    this.showError("invalid number!");
                     return
                 }
                 inputAmt = inputAmt / Math.pow(10, this.decimals[inputDenom]);
@@ -330,7 +348,10 @@
                     let deltaIris = this.poolIrisAmt * Math.pow(10, this.decimals[irisUdenom]);
                     let deltaToken = (deltaIris / iris.amount) * token.amount + 1;
                     this.poolTokenAmt = deltaToken / Math.pow(10, this.decimals[tokenUdenom])
+                }).then(() => {
+                    this.showError(`liquidity pool ${denom} not exist !`);
                 });
+                this.clearError();
             },
             removeLiquidityInput(){
                 this.computeRemoveLiquidity(this.poolLiquidityDropdown);
@@ -368,7 +389,10 @@
                         rate: `1 ${tokenMainDenom} = ${reserveIrisAmt / reserveTokenAmt} ${irisMainDenom}`,
                         size: `${reserveIrisAmt} ${irisMainDenom} + ${reserveTokenAmt} ${tokenMainDenom}`,
                     };
+                }).catch(() => {
+                    this.showError(`liquidity pool ${denom} not exist !`);
                 });
+                this.clearError();
             },
             emptyFun() {
             }
