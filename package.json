@@ -1,7 +1,7 @@
 {
-  "name": "iris-coinswap",
+  "name": "coinswap",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "scripts": {
     "dev-build": "vue-cli-service build --mode development",
     "serve": "vue-cli-service serve",
