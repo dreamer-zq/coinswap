@@ -355,10 +355,18 @@
 
                     let tokenAmt = token.amount / Math.pow(10, this.decimals[tokenUdenom]);
                     let irisAmt = iris.amount / Math.pow(10, this.decimals[irisUdenom]);
-                    this.poolState = {
-                        rate: `1 ${tokenMainDenom} = ${irisAmt / tokenAmt} ${irisMainDenom}`,
-                        size: `${irisAmt} ${irisMainDenom} + ${tokenAmt} ${tokenMainDenom}`,
-                    };
+
+                    if (data.token.amount === "0") {
+                        this.poolState = {
+                            size: `${irisAmt} ${irisMainDenom} + ${tokenAmt} ${tokenMainDenom}`,
+                        };
+                        return;
+                    }else {
+                        this.poolState = {
+                            rate: `1 ${tokenMainDenom} = ${irisAmt / tokenAmt} ${irisMainDenom}`,
+                            size: `${irisAmt} ${irisMainDenom} + ${tokenAmt} ${tokenMainDenom}`,
+                        };
+                    }
                     if (this.poolIrisAmt === 0) {
                         return;
                     }
@@ -378,12 +386,12 @@
                 this.poolLiquidityDropdown = denom;
                 let parent = this;
                 client.getReservePool(denom).then(data => {
-                    if (!data) {
+                    if (!data || data.liquidity.amount === "0") {
+                        this.showError(`liquidity ${denom} equal zero `);
                         return;
                     }
                     let token = data.token;
                     let iris = data.iris;
-
 
                     let tokenUdenom = minTokenToUdenom(token.denom);
                     let irisUdenom = minTokenToUdenom(iris.denom);
