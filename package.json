@@ -11,8 +11,9 @@
   "dependencies": {
     "core-js": "^2.6.5",
     "element-ui": "^2.11.1",
-    "sdk-js": "git+https://github.com/zhiqiang-bianjie/sdk-js.git#asset",
-    "vue": "^2.6.10"
+    "sdk-js": "git+https://github.com/zhiqiang-bianjie/sdk-js.git#ledger",
+    "vue": "^2.6.10",
+    "@ledgerhq/hw-transport-webusb": "latest"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.10.0",

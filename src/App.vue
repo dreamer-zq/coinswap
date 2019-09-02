@@ -23,7 +23,7 @@
                             </el-tag>
                         </div>
                         <div class="tab_div">
-                            <el-button type="primary" round style="width: 35%">Swap</el-button>
+                            <el-button type="primary" round style="width: 35%" @click="doSwap">Swap</el-button>
                         </div>
                     </el-tab-pane>
                     <el-tab-pane label="Send">
@@ -101,6 +101,7 @@
 <script>
     import Dropdown from './components/Dropdown.vue'
     import {IrisClient} from 'sdk-js'
+    import TransportWebUSB from '@ledgerhq/hw-transport-webusb';
 
     const AddLiquidity = 'Add Liquidity';
     const RemoveLiquidity = 'Remove Liquidity';
@@ -113,11 +114,20 @@
     //     mathExt = extension;
     //     loginWallet()
     // });
-
-    let client = new IrisClient("10.1.4.124:1317", {
+    const fee = {denom: "iris-atto", amount: 600000000000000000};
+    const gas = 30000;
+    const chainId = "irishub-test";
+    let client = new IrisClient("https://localhost/api", {
         network: "testnet",
         chain: "iris",
         timeout: 10000
+    });
+
+    const path = [44, 118, 0, 0, 0];
+
+    let app = null;
+    createLedgerApp(ledgerApp => {
+        app = ledgerApp;
     });
 
     export default {
@@ -146,6 +156,7 @@
                 swapInputDropdown: "",
                 swapOutput: 0,
                 swapOutputDropdown: "",
+                isBuyOrder: false,
                 exchangeRate: "",
                 methodDesc: "Add Liquidity",
                 poolTokenDropdown: "",
@@ -171,7 +182,7 @@
                 client.getTokens().then(res => {
                     res.forEach((item) => {
                         let token = item.base_token;
-                        let uDenom = `u-${token.id}`;
+                        let uDenom = `uni:${token.id}`;
                         let option = {
                             value: uDenom,
                             label: token.symbol.toUpperCase(),
@@ -182,7 +193,7 @@
                         if (token.id !== "iris") {
                             this.poolLiquidity.push({
                                 value: uDenom,
-                                label: `u-${token.symbol}`.toUpperCase(),
+                                label: `uni:${token.symbol}`.toUpperCase(),
                             });
                             this.filterData.push(option);
                         }
@@ -221,7 +232,7 @@
                 if (this.swapInputDropdown === "" || this.swapOutputDropdown === "") {
                     return
                 }
-                if (this.swapInputDropdown === "u-iris" && this.swapOutputDropdown === "u-iris") {
+                if (this.swapInputDropdown === "uni:iris" && this.swapOutputDropdown === "uni:iris") {
                     return
                 }
                 this.setInputAmount()
@@ -231,19 +242,20 @@
                 if (this.swapInputDropdown === "" || this.swapOutputDropdown === "") {
                     return
                 }
-                if (this.swapInputDropdown === "u-iris" && this.swapOutputDropdown === "u-iris") {
+                if (this.swapInputDropdown === "uni:iris" && this.swapOutputDropdown === "uni:iris") {
                     return
                 }
                 this.setOutputAmount()
             },
             setInputAmount() {
+                this.isBuyOrder = true;
                 let inputDenom = this.swapInputDropdown;
                 let outputDenom = this.swapOutputDropdown;
                 let outputAmt = this.swapOutput * Math.pow(10, this.decimals[outputDenom]);
                 if (inputDenom === "" || outputDenom === "" || inputDenom === outputDenom) {
                     return;
                 }
-                if (inputDenom === "u-iris" && outputDenom === "u-iris") {
+                if (inputDenom === "uni:iris" && outputDenom === "uni:iris") {
                     return;
                 }
                 if (!Number.isInteger(outputAmt) || outputAmt === 0) {
@@ -251,14 +263,14 @@
                     return;
                 }
 
-                if (inputDenom === "u-iris") {
+                if (inputDenom === "uni:iris") {
                     client.tradeIrisForExactTokens(outputDenom, outputAmt).then(data => {
                         this.swapInput = data.toNumber() / Math.pow(10, this.decimals[inputDenom]);
                         this.showRate(data.toNumber(), inputDenom, outputAmt, outputDenom)
                     }).catch((e) => {
                         this.showError(`${e}`)
                     });
-                } else if (outputDenom === "u-iris") {
+                } else if (outputDenom === "uni:iris") {
                     client.tradeTokensForExactIris(inputDenom, outputAmt).then(data => {
                         this.swapInput = data.toNumber() / Math.pow(10, this.decimals[inputDenom]);
                         this.showRate(data.toNumber(), inputDenom, outputAmt, outputDenom)
@@ -277,27 +289,28 @@
                 this.clearError();
             },
             setOutputAmount() {
+                this.isBuyOrder = false;
                 let inputDenom = this.swapInputDropdown;
                 let outputDenom = this.swapOutputDropdown;
                 let inputAmt = this.swapInput * Math.pow(10, this.decimals[inputDenom]);
                 if (inputDenom === "" || outputDenom === "" || inputDenom === outputDenom) {
                     return;
                 }
-                if (inputDenom === "u-iris" && outputDenom === "u-iris") {
+                if (inputDenom === "uni:iris" && outputDenom === "uni:iris") {
                     return;
                 }
                 if (!Number.isInteger(inputAmt) || inputAmt === 0) {
                     this.showError("invalid number!");
                     return;
                 }
-                if (inputDenom === "u-iris") {
+                if (inputDenom === "uni:iris") {
                     client.tradeExactIrisForTokens(outputDenom, inputAmt).then(data => {
                         this.swapOutput = data.toNumber() / Math.pow(10, this.decimals[outputDenom]);
                         this.showRate(inputAmt, inputDenom, data.toNumber(), outputDenom)
                     }).catch((e) => {
                         this.showError(`${e}`)
                     });
-                } else if (outputDenom === "u-iris") {
+                } else if (outputDenom === "uni:iris") {
                     client.tradeExactTokensForIris(inputDenom, inputAmt).then(data => {
                         this.swapOutput = data.toNumber() / Math.pow(10, this.decimals[outputDenom]);
                         this.showRate(inputAmt, inputDenom, data.toNumber(), outputDenom)
@@ -322,10 +335,10 @@
                 }
                 inputAmt = inputAmt / Math.pow(10, this.decimals[inputDenom]);
                 outputAmt = outputAmt / Math.pow(10, this.decimals[outputDenom]);
-                if (inputDenom === "u-iris") {
+                if (inputDenom === "uni:iris") {
                     let rate = inputAmt / outputAmt;
                     this.exchangeRate = `1 ${getMainDenom(outputDenom)} = ${rate} ${getMainDenom(inputDenom)}`;
-                } else if (outputDenom === "u-iris") {
+                } else if (outputDenom === "uni:iris") {
                     let rate = outputAmt / inputAmt;
                     this.exchangeRate = `1 ${getMainDenom(inputDenom)} = ${rate} ${getMainDenom(outputDenom)}`;
                 } else {
@@ -338,7 +351,7 @@
             },
             computeAddLiquidity(denom) {
                 this.poolTokenDropdown = denom;
-                if (denom === 'u-iris') {
+                if (denom === 'uni:iris') {
                     return
                 }
                 client.getReservePool(denom).then(data => {
@@ -421,7 +434,72 @@
                 this.clearError();
             },
             emptyFun() {
-            }
+            },
+            async doSwap() {
+                let {addr,pubKey} = await this.getAddressAndPubKey();
+                let parent = this;
+                let inputDenom = this.swapInputDropdown;
+                let inputAmt = this.swapInput * Math.pow(10, this.decimals[inputDenom]);
+
+                let input = {
+                    denom: udenomToMinDenom(inputDenom),
+                    amount: String(inputAmt),
+                };
+                let outputDenom = this.swapOutputDropdown;
+                let outputAmt = this.swapOutput * Math.pow(10, this.decimals[outputDenom]);
+                let output = {
+                    denom: udenomToMinDenom(outputDenom),
+                    amount: String(outputAmt),
+                };
+
+                let isBuyOrder = this.isBuyOrder;
+
+                client.getAccount(addr).then(async function (result) {
+                    let account = result.value;
+                    let tx = {
+                        chain_id: chainId,
+                        from: account.address,
+                        account_number: account.account_number,
+                        sequence: account.sequence,
+                        fees: fee,
+                        gas: gas,
+                        type: "swap_order",
+                        msg: {
+                            input : {
+                                address: account.address,
+                                coin: input,
+                            },
+                            output : {
+                                address: account.address,
+                                coin: output,
+                            },
+                            deadline: new Date().getTime(),
+                            isBuyOrder: isBuyOrder
+                        }
+                    };
+                    let stdTx = client.getBuilder().buildTx(tx);
+                    let signMsg = JSON.stringify(stdTx.GetSignBytes());
+                    let signature = await parent.signTx(signMsg);
+                    stdTx.SetSignature({pub_key:pubKey,signature:signature});
+                    let data = stdTx.GetData();
+                    client.sendRawTransaction(data).then(result => {
+                        // eslint-disable-next-line no-console
+                        console.log(JSON.stringify(result))
+                    }).catch(e => {
+                        // eslint-disable-next-line no-console
+                        console.log(e)
+                    })
+                });
+            },
+            async getAddressAndPubKey() {
+                let result = await app.getAddressAndPubKey(path,"faa");
+                return {addr :result.bech32_address,pubKey:result.compressed_pk};
+            },
+            async signTx(msg) {
+                // now it is possible to access all commands in the app
+                const response = await app.sign(path, msg);
+                return response.signature
+            },
         },
         mounted() {
             this.init()
@@ -429,19 +507,35 @@
     }
 
     function getMainDenom(denom) {
-        if (denom === "u-iris") {
+        if (denom === "uni:iris") {
             return "IRIS"
         }
-        let domain = denom.replace("u-", "");
+        let domain = denom.replace("uni:", "");
         return domain.toUpperCase()
     }
 
     function minTokenToUdenom(denom) {
         if (denom === "iris-atto") {
-            return "u-iris"
+            return "uni:iris"
         }
         let domain = denom.replace("-min", "");
-        return `u-${domain}`
+        return `uni:${domain}`
+    }
+
+    function udenomToMinDenom(denom) {
+        if (denom === "uni:iris") {
+            return "iris-atto"
+        }
+        let domain = denom.replace("uni:", "");
+        return `${domain}-min`
+    }
+
+    function createLedgerApp(callback) {
+        TransportWebUSB.create().then(transport =>{
+            client.getLedger().create(transport).then(app => {
+                callback(app)
+            });
+        });
     }
 
     // async function initMathExtension(){
