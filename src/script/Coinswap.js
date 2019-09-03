@@ -25,8 +25,10 @@ export class CoinSwap {
             isBuyOrder: isBuyOrder});
     }
 
-    sendAddLiquidityTx(maxToken,exactIrisAmt,minLiquidity){
-        maxToken.amount = maxToken.amount * (1 + slippageRate);
+    sendAddLiquidityTx(maxToken,exactIrisAmt,minLiquidity,isCreate){
+        if (!isCreate) {
+            maxToken.amount = maxToken.amount * (1 + slippageRate);
+        }
         minLiquidity = minLiquidity * (1 - slippageRate);
         return this._sendRawTransaction("add_liquidity",{
             maxToken: maxToken,

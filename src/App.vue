@@ -79,8 +79,8 @@
                         </div>
                         <div class="tab_div" style="margin-top: 0px" v-if="poolState !== ''">
                             <el-tag class="el-tag">
-                                <p><span>Exchange Rate:</span><span>{{poolState.rate}}</span></p>
-                                <p><span>Current Pool Size:</span><span>{{poolState.size}}</span></p>
+                                <p v-if="poolState.rate !== ''"><span>Exchange Rate:</span><span>{{poolState.rate}}</span></p>
+                                <p v-if="poolState.size !== ''"><span>Current Pool Size:</span><span>{{poolState.size}}</span></p>
                                 <p v-if="mintLiquidity !== 0"><span>Get Pool Share:</span><span>{{mintLiquidity}}</span></p>
                             </el-tag>
                         </div>
@@ -343,6 +343,9 @@
                 this.computeAddLiquidity(this.poolTokenDropdown);
             },
             computeAddLiquidity(denom) {
+                this.mintLiquidity = 0;
+                this.poolState = {rate: "",size: ""};
+
                 this.poolTokenDropdown = denom;
                 if (denom === 'uni:iris') {
                     return
@@ -359,20 +362,18 @@
                     let tokenMainDenom = Token.getMainDenom(tokenUdenom);
                     let irisMainDenom = Token.getMainDenom(irisUdenom);
 
+                    if (data.liquidity.amount === "0") {
+                        this.poolState.size = `0 ${irisMainDenom} + 0 ${tokenMainDenom}`;
+                        return;
+                    }
+
                     let tokenAmt = Token.toFix(token.amount / Math.pow(10, this.decimals[tokenUdenom]));
                     let irisAmt = Token.toFix(iris.amount / Math.pow(10, this.decimals[irisUdenom]));
 
-                    if (data.token.amount === "0") {
-                        this.poolState = {
-                            size: `${irisAmt} ${irisMainDenom} + ${tokenAmt} ${tokenMainDenom}`,
-                        };
-                        return;
-                    }else {
-                        this.poolState = {
-                            rate: `1 ${tokenMainDenom} = ${Token.toFix(irisAmt / tokenAmt)} ${irisMainDenom}`,
-                            size: `${irisAmt} ${irisMainDenom} + ${tokenAmt} ${tokenMainDenom}`,
-                        };
-                    }
+                    this.poolState = {
+                        rate: `1 ${tokenMainDenom} = ${Token.toFix(irisAmt / tokenAmt)} ${irisMainDenom}`,
+                        size: `${irisAmt} ${irisMainDenom} + ${tokenAmt} ${tokenMainDenom}`,
+                    };
                     if (this.poolIrisAmt === 0) {
                         return;
                     }
@@ -435,12 +436,12 @@
             doSwap() {
                 let input = {
                     denom: Token.uniDenomToMinDenom(this.swapInputDropdown),
-                    amount: String(this.swapInput * Math.pow(10, this.decimals[this.swapInputDropdown])),
+                    amount: this.swapInput * Math.pow(10, this.decimals[this.swapInputDropdown]),
                 };
 
                 let output = {
                     denom: Token.uniDenomToMinDenom(this.swapOutputDropdown),
-                    amount: String(this.swapOutput * Math.pow(10, this.decimals[this.swapOutputDropdown])),
+                    amount: this.swapOutput * Math.pow(10, this.decimals[this.swapOutputDropdown]),
                 };
 
                 swap.sendSwapTx(input,output,this.recipient,this.isBuyOrder).then((result) => {
@@ -460,7 +461,8 @@
 
                   let exactIrisAmt = this.poolIrisAmt * Math.pow(10, this.decimals["uni:iris"]);
                   let mintLiquidity = this.mintLiquidity * Math.pow(10, this.decimals["uni:iris"]);
-                  swap.sendAddLiquidityTx(maxToken,exactIrisAmt,mintLiquidity).then(result => {
+                  let isCreate = this.poolState.rate === '';
+                  swap.sendAddLiquidityTx(maxToken,exactIrisAmt,mintLiquidity,isCreate).then(result => {
                       this.tipType = "success";
                       this.msg = `${result.hash}`;
                   }).catch(e => {
