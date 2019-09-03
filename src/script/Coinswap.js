@@ -1,9 +1,9 @@
 import {Ledger} from './Ledger';
 
 
-const fee = {denom: "iris-atto", amount: 600000000000000000};
-const gas = 30000;
-const chainId = "irishub-test";
+const fee = {denom: "iris-atto", amount: process.env.VUE_APP_HUB_TX_FEE};
+const gas = process.env.VUE_APP_HUB_TX_GAS;
+const chainId = process.env.VUE_APP_HUB_CHAIN_ID;
 const slippageRate = 0.01;
 
 export class CoinSwap {
@@ -86,7 +86,11 @@ export class CoinSwap {
                 stdTx.SetSignature({pub_key: account.pubKey, signature: signature});
                 let postData = stdTx.GetData();
                 return parent.client.sendRawTransaction(postData,{mode : "commit"})
+            }).catch(e => {
+                throw e;
             });
+        }).catch(e => {
+            throw e;
         });
     }
 

@@ -106,10 +106,10 @@
     const AddLiquidity = 'Add Liquidity';
     const RemoveLiquidity = 'Remove Liquidity';
 
-    let client = new IrisClient("https://localhost/api", {
-        network: "testnet",
+    let client = new IrisClient(process.env.VUE_APP_LCD_SERVER, {
+        network: process.env.VUE_APP_HUB_NETWORK,
         chain: "iris",
-        timeout: 10000
+        timeout: process.env.VUE_APP_AXIOS_TIMEOUT
     });
 
     let swap = new CoinSwap(client);
