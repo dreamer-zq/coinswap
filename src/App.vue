@@ -101,34 +101,18 @@
 <script>
     import Dropdown from './components/Dropdown.vue'
     import {IrisClient} from 'sdk-js'
-    import TransportWebUSB from '@ledgerhq/hw-transport-webusb';
+    import {CoinSwap} from './script/Coinswap';
 
     const AddLiquidity = 'Add Liquidity';
     const RemoveLiquidity = 'Remove Liquidity';
-    // const network = {
-    //     blockchain: "iris",
-    //     chainId: "irishub"
-    // };
-    // let mathExt = null;
-    // initMathExtension().then((extension) => {
-    //     mathExt = extension;
-    //     loginWallet()
-    // });
-    const fee = {denom: "iris-atto", amount: 600000000000000000};
-    const gas = 30000;
-    const chainId = "irishub-test";
+
     let client = new IrisClient("https://localhost/api", {
         network: "testnet",
         chain: "iris",
         timeout: 10000
     });
 
-    const path = [44, 118, 0, 0, 0];
-
-    let app = null;
-    createLedgerApp(ledgerApp => {
-        app = ledgerApp;
-    });
+    let swap = new CoinSwap(client);
 
     export default {
         name: 'app',
@@ -436,69 +420,23 @@
             emptyFun() {
             },
             async doSwap() {
-                let {addr,pubKey} = await this.getAddressAndPubKey();
-                let parent = this;
-                let inputDenom = this.swapInputDropdown;
-                let inputAmt = this.swapInput * Math.pow(10, this.decimals[inputDenom]);
-
                 let input = {
-                    denom: udenomToMinDenom(inputDenom),
-                    amount: String(inputAmt),
+                    denom: udenomToMinDenom(this.swapInputDropdown),
+                    amount: String(this.swapInput * Math.pow(10, this.decimals[this.swapInputDropdown])),
                 };
-                let outputDenom = this.swapOutputDropdown;
-                let outputAmt = this.swapOutput * Math.pow(10, this.decimals[outputDenom]);
+
                 let output = {
-                    denom: udenomToMinDenom(outputDenom),
-                    amount: String(outputAmt),
+                    denom: udenomToMinDenom(this.swapOutputDropdown),
+                    amount: String(this.swapOutput * Math.pow(10, this.decimals[this.swapOutputDropdown])),
                 };
 
-                let isBuyOrder = this.isBuyOrder;
-
-                client.getAccount(addr).then(async function (result) {
-                    let account = result.value;
-                    let tx = {
-                        chain_id: chainId,
-                        from: account.address,
-                        account_number: account.account_number,
-                        sequence: account.sequence,
-                        fees: fee,
-                        gas: gas,
-                        type: "swap_order",
-                        msg: {
-                            input : {
-                                address: account.address,
-                                coin: input,
-                            },
-                            output : {
-                                address: account.address,
-                                coin: output,
-                            },
-                            deadline: new Date().getTime(),
-                            isBuyOrder: isBuyOrder
-                        }
-                    };
-                    let stdTx = client.getBuilder().buildTx(tx);
-                    let signMsg = JSON.stringify(stdTx.GetSignBytes());
-                    let signature = await parent.signTx(signMsg);
-                    stdTx.SetSignature({pub_key:pubKey,signature:signature});
-                    let data = stdTx.GetData();
-                    client.sendRawTransaction(data).then(result => {
-                        // eslint-disable-next-line no-console
-                        console.log(JSON.stringify(result))
-                    }).catch(e => {
-                        // eslint-disable-next-line no-console
-                        console.log(e)
-                    })
+                swap.sendSwapTx(input,output,this.isBuyOrder).then((result) => {
+                    // eslint-disable-next-line no-console
+                    console.log(JSON.stringify(result));
+                }).catch(e => {
+                    // eslint-disable-next-line no-console
+                    console.log(e)
                 });
-            },
-            async getAddressAndPubKey() {
-                let result = await app.getAddressAndPubKey(path,"faa");
-                return {addr :result.bech32_address,pubKey:result.compressed_pk};
-            },
-            async signTx(msg) {
-                // now it is possible to access all commands in the app
-                const response = await app.sign(path, msg);
-                return response.signature
             },
         },
         mounted() {
@@ -529,34 +467,6 @@
         let domain = denom.replace("uni:", "");
         return `${domain}-min`
     }
-
-    function createLedgerApp(callback) {
-        TransportWebUSB.create().then(transport =>{
-            client.getLedger().create(transport).then(app => {
-                callback(app)
-            });
-        });
-    }
-
-    // async function initMathExtension(){
-    //     let tries = 10;
-    //     for (let i = 0; i < tries; i++) {
-    //         let loaded = await new Promise((resolve) => {
-    //             setTimeout(function(){
-    //                 resolve(typeof window.mathExtension != 'undefined');
-    //             }, 100);
-    //         });
-    //         if(loaded) return window.mathExtension;
-    //     }
-    //     return false;
-    // }
-    // function loginWallet() {
-    //     mathExt.getIdentity(network).then(identity => {
-    //         console.log(identity);
-    //     }).catch(e => {
-    //         console.log(e);
-    //     })
-    // }
 </script>
 <style>
     #app {
