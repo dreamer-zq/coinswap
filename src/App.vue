@@ -4,17 +4,17 @@
             <el-header><img alt="Vue logo"
                             src="https://www.irisnet.org/dist/irisnet_logo.png?4386a8f8710c9076ff3bb63fc78ef4e7">
             </el-header>
-            <el-main style="margin: 80px auto 0 auto;width: 600px;">
+            <el-main style="margin: 80px auto 0 auto;width: 700px;">
                 <el-tabs type="border-card" @tab-click="tabClick">
                     <el-tab-pane label="Swap">
                         <div class="tab_div">
                             <el-input v-model="swapInput" style="width: 50%" @input="setOutputAmount"/>
-                            <Dropdown v-model="swapInputDropdown" style="width: 100px" :itemData="data"
+                            <Dropdown v-model="swapInputDropdown" style="width: 150px" :itemData="data"
                                       :change="changeInput"/>
                         </div>
                         <div class="tab_div">
                             <el-input v-model="swapOutput" style="width: 50%" @input="setInputAmount"/>
-                            <Dropdown style="width: 100px" :itemData="data" :change="changeOutput"
+                            <Dropdown style="width: 150px" :itemData="data" :change="changeOutput"
                                       v-model="swapOutputDropdown"/>
                         </div>
                         <div class="tab_div" v-if="exchangeRate !== ''">
@@ -29,16 +29,16 @@
                     <el-tab-pane label="Send">
                         <div class="tab_div">
                             <el-input v-model="swapInput" style="width: 50%" @input="setOutputAmount"/>
-                            <Dropdown v-model="swapInputDropdown" style="width: 100px" :itemData="data"
+                            <Dropdown v-model="swapInputDropdown" style="width: 150px" :itemData="data"
                                       :change="changeInput"/>
                         </div>
                         <div class="tab_div">
                             <el-input v-model="swapOutput" style="width: 50%" @input="setInputAmount"/>
-                            <Dropdown style="width: 100px" :itemData="data" :change="changeOutput"
+                            <Dropdown style="width: 150px" :itemData="data" :change="changeOutput"
                                       v-model="swapOutputDropdown"/>
                         </div>
                         <div class="tab_div">
-                            <el-input style="width: 72%" placeholder="Recipient Address"/>
+                            <el-input v-model="recipient" style="width: 77%" placeholder="Recipient Address"/>
                         </div>
                         <div class="tab_div" v-if="exchangeRate !== ''">
                             <el-tag class="el-tag">
@@ -46,7 +46,7 @@
                             </el-tag>
                         </div>
                         <div class="tab_div">
-                            <el-button type="primary" round style="width: 35%">Swap</el-button>
+                            <el-button type="primary" round style="width: 35%" @click="doSwap">Swap</el-button>
                         </div>
                     </el-tab-pane>
                     <el-tab-pane label="Pool">
@@ -55,11 +55,11 @@
                                 <el-tab-pane label="Add Liquidity">
                                     <div class="tab_div">
                                         <el-input v-model="poolIrisAmt" style="width: 50%" @input="addLiquidityInput"/>
-                                        <Dropdown style="width: 100px" :itemData="i_data" :change="emptyFun" disabled/>
+                                        <Dropdown style="width: 150px" :itemData="i_data" :change="emptyFun" disabled/>
                                     </div>
                                     <div class="tab_div">
                                         <el-input v-model="poolTokenAmt" style="width: 50%"/>
-                                        <Dropdown style="width: 100px" :itemData="filterData"
+                                        <Dropdown style="width: 150px" :itemData="filterData"
                                                   :change="computeAddLiquidity" v-model="poolTokenDropdown"/>
                                     </div>
                                 </el-tab-pane>
@@ -67,11 +67,11 @@
                                     <div class="tab_div">
                                         <el-input v-model="poolLiquidityAmt" @input="removeLiquidityInput"
                                                   style="width: 50%"/>
-                                        <Dropdown style="width: 100px" :itemData="poolLiquidity"
+                                        <Dropdown style="width: 150px" :itemData="poolLiquidity"
                                                   :change="computeRemoveLiquidity" v-model="poolLiquidityDropdown"/>
                                     </div>
                                     <div class="tab_div">
-                                        <el-input readonly v-model="poolLiquidityOutput" style="width: 72%"
+                                        <el-input readonly v-model="poolLiquidityOutput" style="width: 77%"
                                                   placeholder="Output"/>
                                     </div>
                                 </el-tab-pane>
@@ -81,15 +81,15 @@
                             <el-tag class="el-tag">
                                 <p><span>Exchange Rate:</span><span>{{poolState.rate}}</span></p>
                                 <p><span>Current Pool Size:</span><span>{{poolState.size}}</span></p>
-                                <p><span>Your Pool Share (%):</span><span>{{poolState.share}}</span></p>
+                                <p v-if="mintLiquidity !== 0"><span>Get Pool Share:</span><span>{{mintLiquidity}}</span></p>
                             </el-tag>
                         </div>
                         <div class="tab_div">
-                            <el-button type="primary" style="width: 35%" round>{{methodDesc}}</el-button>
+                            <el-button type="primary" style="width: 35%" round @click="doLiquidity">{{methodDesc}}</el-button>
                         </div>
                     </el-tab-pane>
-                    <div class="tab_div" v-if="errorMsg !== ''">
-                        <el-tag type="danger">{{errorMsg}}</el-tag>
+                    <div class="tab_div" v-if="msg !== ''">
+                        <el-tag :type="tipType">{{msg}}</el-tag>
                     </div>
                 </el-tabs>
             </el-main>
@@ -101,7 +101,7 @@
 <script>
     import Dropdown from './components/Dropdown.vue'
     import {IrisClient} from 'sdk-js'
-    import {CoinSwap} from './script/Coinswap';
+    import {CoinSwap,Token} from './script/Coinswap';
 
     const AddLiquidity = 'Add Liquidity';
     const RemoveLiquidity = 'Remove Liquidity';
@@ -135,11 +135,13 @@
                     value: 'iris-atto',
                     label: 'IRIS',
                 }],
-                errorMsg: "",
+                msg: "",
+                tipType: "danger",
                 swapInput: 0,
                 swapInputDropdown: "",
                 swapOutput: 0,
                 swapOutputDropdown: "",
+                recipient: "",
                 isBuyOrder: false,
                 exchangeRate: "",
                 methodDesc: "Add Liquidity",
@@ -149,6 +151,9 @@
                 poolTokenAmt: 0,
                 poolLiquidity: [],
                 poolLiquidityAmt: 0,
+                deltaIrisAmt: 0,
+                deltaTokenAmt: 0,
+                mintLiquidity: 0,
                 poolLiquidityOutput: "",
                 poolLiquidityDropdown: "",
             }
@@ -166,7 +171,7 @@
                 client.getTokens().then(res => {
                     res.forEach((item) => {
                         let token = item.base_token;
-                        let uDenom = `uni:${token.id}`;
+                        let uDenom = Token.getUniDenom(token.id);
                         let option = {
                             value: uDenom,
                             label: token.symbol.toUpperCase(),
@@ -177,7 +182,7 @@
                         if (token.id !== "iris") {
                             this.poolLiquidity.push({
                                 value: uDenom,
-                                label: `uni:${token.symbol}`.toUpperCase(),
+                                label: Token.getUniDenom(token.id).toUpperCase(),
                             });
                             this.filterData.push(option);
                         }
@@ -193,10 +198,11 @@
                 this.poolTabClick()
             },
             showError(message) {
-                this.errorMsg = message;
+                this.tipType = "danger";
+                this.msg = message;
             },
             clearError() {
-                this.errorMsg = '';
+                this.msg = '';
             },
             poolTabClick(tab) {
                 this.poolState = "";
@@ -204,6 +210,9 @@
                 this.poolTokenAmt = 0;
                 this.poolLiquidityAmt = 0;
                 this.poolLiquidityOutput = 0;
+                this.deltaIrisAmt = 0;
+                this.deltaTokenAmt = 0;
+                this.mintLiquidity = 0;
                 let method = AddLiquidity;
                 if (tab) {
                     method = tab.label
@@ -249,21 +258,21 @@
 
                 if (inputDenom === "uni:iris") {
                     client.tradeIrisForExactTokens(outputDenom, outputAmt).then(data => {
-                        this.swapInput = data.toNumber() / Math.pow(10, this.decimals[inputDenom]);
+                        this.swapInput = Token.toFix(data.toNumber() / Math.pow(10, this.decimals[inputDenom]));
                         this.showRate(data.toNumber(), inputDenom, outputAmt, outputDenom)
                     }).catch((e) => {
                         this.showError(`${e}`)
                     });
                 } else if (outputDenom === "uni:iris") {
                     client.tradeTokensForExactIris(inputDenom, outputAmt).then(data => {
-                        this.swapInput = data.toNumber() / Math.pow(10, this.decimals[inputDenom]);
+                        this.swapInput = Token.toFix(data.toNumber() / Math.pow(10, this.decimals[inputDenom]));
                         this.showRate(data.toNumber(), inputDenom, outputAmt, outputDenom)
                     }).catch((e) => {
                         this.showError(`${e}`)
                     });
                 } else {
                     client.tradeTokensForExactTokens(inputDenom, outputDenom, outputAmt).then(data => {
-                        this.swapInput = data.toNumber() / Math.pow(10, this.decimals[inputDenom]);
+                        this.swapInput = Token.toFix(data.toNumber() / Math.pow(10, this.decimals[inputDenom]));
                         this.showRate(data.toNumber(), inputDenom, outputAmt, outputDenom)
                     }).catch((e) => {
                         this.showError(`${e}`)
@@ -289,21 +298,21 @@
                 }
                 if (inputDenom === "uni:iris") {
                     client.tradeExactIrisForTokens(outputDenom, inputAmt).then(data => {
-                        this.swapOutput = data.toNumber() / Math.pow(10, this.decimals[outputDenom]);
+                        this.swapOutput = Token.toFix(data.toNumber() / Math.pow(10, this.decimals[outputDenom]));
                         this.showRate(inputAmt, inputDenom, data.toNumber(), outputDenom)
                     }).catch((e) => {
                         this.showError(`${e}`)
                     });
                 } else if (outputDenom === "uni:iris") {
                     client.tradeExactTokensForIris(inputDenom, inputAmt).then(data => {
-                        this.swapOutput = data.toNumber() / Math.pow(10, this.decimals[outputDenom]);
+                        this.swapOutput = Token.toFix(data.toNumber() / Math.pow(10, this.decimals[outputDenom]));
                         this.showRate(inputAmt, inputDenom, data.toNumber(), outputDenom)
                     }).catch((e) => {
                         this.showError(`${e}`)
                     });
                 } else {
                     client.tradeExactTokensForTokens(inputDenom, outputDenom, inputAmt).then(data => {
-                        this.swapOutput = data.toNumber() / Math.pow(10, this.decimals[outputDenom]);
+                        this.swapOutput = Token.toFix(data.toNumber() / Math.pow(10, this.decimals[outputDenom]));
                         this.showRate(inputAmt, inputDenom, data.toNumber(), outputDenom)
                     }).catch((e) => {
                         this.showError(`${e}`)
@@ -320,14 +329,14 @@
                 inputAmt = inputAmt / Math.pow(10, this.decimals[inputDenom]);
                 outputAmt = outputAmt / Math.pow(10, this.decimals[outputDenom]);
                 if (inputDenom === "uni:iris") {
-                    let rate = inputAmt / outputAmt;
-                    this.exchangeRate = `1 ${getMainDenom(outputDenom)} = ${rate} ${getMainDenom(inputDenom)}`;
+                    let rate = Token.toFix(inputAmt / outputAmt);
+                    this.exchangeRate = `1 ${Token.getMainDenom(outputDenom)} = ${rate} ${Token.getMainDenom(inputDenom)}`;
                 } else if (outputDenom === "uni:iris") {
-                    let rate = outputAmt / inputAmt;
-                    this.exchangeRate = `1 ${getMainDenom(inputDenom)} = ${rate} ${getMainDenom(outputDenom)}`;
+                    let rate = Token.toFix(outputAmt / inputAmt);
+                    this.exchangeRate = `1 ${Token.getMainDenom(inputDenom)} = ${rate} ${Token.getMainDenom(outputDenom)}`;
                 } else {
-                    let rate = inputAmt / outputAmt;
-                    this.exchangeRate = `1 ${getMainDenom(outputDenom)} = ${rate} ${getMainDenom(inputDenom)}`;
+                    let rate = Token.toFix(inputAmt / outputAmt);
+                    this.exchangeRate = `1 ${Token.getMainDenom(outputDenom)} = ${rate} ${Token.getMainDenom(inputDenom)}`;
                 }
             },
             addLiquidityInput() {
@@ -344,14 +353,14 @@
                     }
                     let token = data.token;
                     let iris = data.iris;
-                    let tokenUdenom = minTokenToUdenom(token.denom);
-                    let irisUdenom = minTokenToUdenom(iris.denom);
+                    let tokenUdenom = Token.minTokenToUniDenom(token.denom);
+                    let irisUdenom = Token.minTokenToUniDenom(iris.denom);
 
-                    let tokenMainDenom = getMainDenom(tokenUdenom);
-                    let irisMainDenom = getMainDenom(irisUdenom);
+                    let tokenMainDenom = Token.getMainDenom(tokenUdenom);
+                    let irisMainDenom = Token.getMainDenom(irisUdenom);
 
-                    let tokenAmt = token.amount / Math.pow(10, this.decimals[tokenUdenom]);
-                    let irisAmt = iris.amount / Math.pow(10, this.decimals[irisUdenom]);
+                    let tokenAmt = Token.toFix(token.amount / Math.pow(10, this.decimals[tokenUdenom]));
+                    let irisAmt = Token.toFix(iris.amount / Math.pow(10, this.decimals[irisUdenom]));
 
                     if (data.token.amount === "0") {
                         this.poolState = {
@@ -360,7 +369,7 @@
                         return;
                     }else {
                         this.poolState = {
-                            rate: `1 ${tokenMainDenom} = ${irisAmt / tokenAmt} ${irisMainDenom}`,
+                            rate: `1 ${tokenMainDenom} = ${Token.toFix(irisAmt / tokenAmt)} ${irisMainDenom}`,
                             size: `${irisAmt} ${irisMainDenom} + ${tokenAmt} ${tokenMainDenom}`,
                         };
                     }
@@ -369,8 +378,9 @@
                     }
                     // compute deposted token
                     let deltaIris = this.poolIrisAmt * Math.pow(10, this.decimals[irisUdenom]);
-                    let deltaToken = (deltaIris / iris.amount) * token.amount + 1;
-                    this.poolTokenAmt = deltaToken / Math.pow(10, this.decimals[tokenUdenom])
+                    let deltaToken = (deltaIris / iris.amount) * token.amount;
+                    this.poolTokenAmt = Token.toFix(deltaToken / Math.pow(10, this.decimals[tokenUdenom]));
+                    this.mintLiquidity = Token.toFix(((data.liquidity.amount * deltaIris)/iris.amount + 1)/Math.pow(10, this.decimals[irisUdenom]))
                 }).catch(() => {
                     this.showError(`liquidity pool ${denom} not exist !`);
                 });
@@ -390,13 +400,13 @@
                     let token = data.token;
                     let iris = data.iris;
 
-                    let tokenUdenom = minTokenToUdenom(token.denom);
-                    let irisUdenom = minTokenToUdenom(iris.denom);
-                    let tokenMainDenom = getMainDenom(tokenUdenom);
-                    let irisMainDenom = getMainDenom(irisUdenom);
+                    let tokenUdenom = Token.minTokenToUniDenom(token.denom);
+                    let irisUdenom = Token.minTokenToUniDenom(iris.denom);
+                    let tokenMainDenom = Token.getMainDenom(tokenUdenom);
+                    let irisMainDenom = Token.getMainDenom(irisUdenom);
 
-                    let reserveTokenAmt = token.amount / Math.pow(10, this.decimals[tokenUdenom]);
-                    let reserveIrisAmt = iris.amount / Math.pow(10, this.decimals[irisUdenom]);
+                    let reserveTokenAmt = Token.toFix(token.amount / Math.pow(10, this.decimals[tokenUdenom]));
+                    let reserveIrisAmt = Token.toFix(iris.amount / Math.pow(10, this.decimals[irisUdenom]));
 
                     let liquidityAmt = data.liquidity.amount;
                     let deltaliquidity = parent.poolLiquidityAmt * Math.pow(10, parent.decimals[irisUdenom]);
@@ -405,11 +415,14 @@
                     // compute deposted token
                     let deltaIris = delta * iris.amount;
                     let deltaToken = delta * token.amount;
-                    let tokenAmt = deltaToken / Math.pow(10, parent.decimals[tokenUdenom]);
-                    let irisAmt = deltaIris / Math.pow(10, parent.decimals[irisUdenom]);
+                    this.deltaIrisAmt = deltaIris;
+                    this.deltaTokenAmt = deltaToken;
+
+                    let tokenAmt = Token.toFix(deltaToken / Math.pow(10, parent.decimals[tokenUdenom]));
+                    let irisAmt = Token.toFix(deltaIris / Math.pow(10, parent.decimals[irisUdenom]));
                     parent.poolLiquidityOutput = `${irisAmt} ${irisMainDenom} + ${tokenAmt} ${tokenMainDenom}`;
                     parent.poolState = {
-                        rate: `1 ${tokenMainDenom} = ${reserveIrisAmt / reserveTokenAmt} ${irisMainDenom}`,
+                        rate: `1 ${tokenMainDenom} = ${Token.toFix(reserveIrisAmt / reserveTokenAmt)} ${irisMainDenom}`,
                         size: `${reserveIrisAmt} ${irisMainDenom} + ${reserveTokenAmt} ${tokenMainDenom}`,
                     };
                 }).catch(() => {
@@ -419,53 +432,57 @@
             },
             emptyFun() {
             },
-            async doSwap() {
+            doSwap() {
                 let input = {
-                    denom: udenomToMinDenom(this.swapInputDropdown),
+                    denom: Token.uniDenomToMinDenom(this.swapInputDropdown),
                     amount: String(this.swapInput * Math.pow(10, this.decimals[this.swapInputDropdown])),
                 };
 
                 let output = {
-                    denom: udenomToMinDenom(this.swapOutputDropdown),
+                    denom: Token.uniDenomToMinDenom(this.swapOutputDropdown),
                     amount: String(this.swapOutput * Math.pow(10, this.decimals[this.swapOutputDropdown])),
                 };
 
-                swap.sendSwapTx(input,output,this.isBuyOrder).then((result) => {
-                    // eslint-disable-next-line no-console
-                    console.log(JSON.stringify(result));
+                swap.sendSwapTx(input,output,this.recipient,this.isBuyOrder).then((result) => {
+                    this.tipType = "success";
+                    this.msg = `${result.hash}`;
                 }).catch(e => {
-                    // eslint-disable-next-line no-console
-                    console.log(e)
+                    this.showError(`${e}`)
                 });
             },
+
+            doLiquidity(){
+              if(this.methodDesc === AddLiquidity){
+                  let maxToken = {
+                      denom: Token.uniDenomToMinDenom(this.poolTokenDropdown),
+                      amount: String(this.poolTokenAmt * Math.pow(10, this.decimals[this.poolTokenDropdown])),
+                  };
+
+                  let exactIrisAmt = this.poolIrisAmt * Math.pow(10, this.decimals["uni:iris"]);
+                  let mintLiquidity = this.mintLiquidity * Math.pow(10, this.decimals["uni:iris"]);
+                  swap.sendAddLiquidityTx(maxToken,exactIrisAmt,mintLiquidity).then(result => {
+                      this.tipType = "success";
+                      this.msg = `${result.hash}`;
+                  }).catch(e => {
+                      this.showError(`${e}`)
+                  });
+              } else if (this.methodDesc === RemoveLiquidity){
+                  let withdrawLiquidity = {
+                      denom: `${this.poolLiquidityDropdown}-min`,
+                      amount: String(this.poolLiquidityAmt * Math.pow(10, this.decimals[this.poolLiquidityDropdown])),
+                  };
+                  swap.sendRemoveLiquidityTx(withdrawLiquidity,this.deltaIrisAmt,this.deltaTokenAmt).then(result => {
+                      this.tipType = "success";
+                      this.msg = `${result.hash}`;
+                  }).catch(e => {
+                      this.showError(`${e}`)
+                  });
+              }
+            }
         },
         mounted() {
             this.init()
         }
-    }
-
-    function getMainDenom(denom) {
-        if (denom === "uni:iris") {
-            return "IRIS"
-        }
-        let domain = denom.replace("uni:", "");
-        return domain.toUpperCase()
-    }
-
-    function minTokenToUdenom(denom) {
-        if (denom === "iris-atto") {
-            return "uni:iris"
-        }
-        let domain = denom.replace("-min", "");
-        return `uni:${domain}`
-    }
-
-    function udenomToMinDenom(denom) {
-        if (denom === "uni:iris") {
-            return "iris-atto"
-        }
-        let domain = denom.replace("uni:", "");
-        return `${domain}-min`
     }
 </script>
 <style>
@@ -481,11 +498,11 @@
 
     .el-tabs__nav-scroll {
         overflow: hidden;
-        margin-left: 150px;
+        margin-left: 200px;
     }
 
     .el-tag {
-        width: 72% !important;
+        width: 77% !important;
         display: inline-block !important;
         height: auto !important;
         line-height: 18px !important;
