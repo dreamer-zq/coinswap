@@ -4,7 +4,8 @@
             v-for="item in itemData"
             :key="item.value"
             :label="item.label"
-            :value="item.value">
+            :value="item.value"
+            align="center">
     </el-option>
   </el-select>
 </template>

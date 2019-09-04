@@ -6,16 +6,21 @@
             </el-header>
             <el-main style="margin: 80px auto 0 auto;width: 700px;">
                 <el-tabs type="border-card" @tab-click="tabClick">
-                    <el-tab-pane label="Swap">
+                    <el-tab-pane label="Swap" style="flex: 1">
                         <div class="tab_div">
-                            <el-input v-model="swapInput" style="width: 50%" @input="setOutputAmount"/>
-                            <Dropdown v-model="swapInputDropdown" style="width: 150px" :itemData="data"
-                                      :change="changeInput"/>
+                            <el-input v-model="swapInput" style="width: 80%" @input="setOutputAmount">
+                                <div slot="prepend" style="width: 50px">Input</div>
+                                <Dropdown v-model="swapInputDropdown" style="width: 100px" slot="append" :itemData="data"
+                                          :change="changeInput"/>
+                            </el-input>
                         </div>
                         <div class="tab_div">
-                            <el-input v-model="swapOutput" style="width: 50%" @input="setInputAmount"/>
-                            <Dropdown style="width: 150px" :itemData="data" :change="changeOutput"
-                                      v-model="swapOutputDropdown"/>
+                            <el-input v-model="swapOutput" style="width: 80%" @input="setInputAmount">
+                                <div slot="prepend" style="width: 50px">Output</div>
+                                <Dropdown v-model="swapOutputDropdown" style="width: 100px" slot="append" :itemData="data"
+                                          :change="changeOutput"/>
+                            </el-input>
+
                         </div>
                         <div class="tab_div" v-if="exchangeRate !== ''">
                             <el-tag class="el-tag">
@@ -26,19 +31,25 @@
                             <el-button type="primary" round style="width: 35%" @click="doSwap">Swap</el-button>
                         </div>
                     </el-tab-pane>
-                    <el-tab-pane label="Send">
+                    <el-tab-pane label="Send" style="flex: 1">
                         <div class="tab_div">
-                            <el-input v-model="swapInput" style="width: 50%" @input="setOutputAmount"/>
-                            <Dropdown v-model="swapInputDropdown" style="width: 150px" :itemData="data"
-                                      :change="changeInput"/>
+                            <el-input v-model="swapInput" style="width: 80%" @input="setOutputAmount">
+                                <div slot="prepend" style="width: 50px">Input</div>
+                                <Dropdown v-model="swapInputDropdown" style="width: 100px" slot="append" :itemData="data"
+                                          :change="changeInput"/>
+                            </el-input>
                         </div>
                         <div class="tab_div">
-                            <el-input v-model="swapOutput" style="width: 50%" @input="setInputAmount"/>
-                            <Dropdown style="width: 150px" :itemData="data" :change="changeOutput"
-                                      v-model="swapOutputDropdown"/>
+                            <el-input v-model="swapOutput" style="width: 80%" @input="setInputAmount">
+                                <div slot="prepend" style="width: 50px">Output</div>
+                                <Dropdown style="width: 100px" slot="append" :itemData="data" :change="changeOutput"
+                                          v-model="swapOutputDropdown"/>
+                            </el-input>
                         </div>
                         <div class="tab_div">
-                            <el-input v-model="recipient" style="width: 77%" placeholder="Recipient Address"/>
+                            <el-input v-model="recipient" style="width: 80%" placeholder="Recipient Address">
+                                <div slot="prepend" style="width: 50px">Recipient</div>
+                            </el-input>
                         </div>
                         <div class="tab_div" v-if="exchangeRate !== ''">
                             <el-tag class="el-tag">
@@ -49,29 +60,33 @@
                             <el-button type="primary" round style="width: 35%" @click="doSwap">Swap</el-button>
                         </div>
                     </el-tab-pane>
-                    <el-tab-pane label="Pool">
+                    <el-tab-pane label="Pool" style="flex: 1">
                         <div>
-                            <el-tabs @tab-click="poolTabClick">
+                            <el-tabs @tab-click="poolTabClick" style="align-content: center">
                                 <el-tab-pane label="Add Liquidity">
                                     <div class="tab_div">
-                                        <el-input v-model="poolIrisAmt" style="width: 50%" @input="addLiquidityInput"/>
-                                        <Dropdown style="width: 150px" :itemData="i_data" :change="emptyFun" disabled/>
+                                        <el-input v-model="poolIrisAmt" style="width: 80%" @input="addLiquidityInput">
+                                            <Dropdown style="width: 100px" slot="append" :itemData="i_data" :change="emptyFun" disabled/>
+                                        </el-input>
                                     </div>
                                     <div class="tab_div">
-                                        <el-input v-model="poolTokenAmt" style="width: 50%"/>
-                                        <Dropdown style="width: 150px" :itemData="filterData"
-                                                  :change="computeAddLiquidity" v-model="poolTokenDropdown"/>
+                                        <el-input v-model="poolTokenAmt" style="width: 80%">
+                                            <Dropdown style="width: 100px" slot="append" :itemData="filterData"
+                                                      :change="computeAddLiquidity" v-model="poolTokenDropdown"/>
+                                        </el-input>
                                     </div>
                                 </el-tab-pane>
                                 <el-tab-pane label="Remove Liquidity">
                                     <div class="tab_div">
                                         <el-input v-model="poolLiquidityAmt" @input="removeLiquidityInput"
-                                                  style="width: 50%"/>
-                                        <Dropdown style="width: 150px" :itemData="poolLiquidity"
-                                                  :change="computeRemoveLiquidity" v-model="poolLiquidityDropdown"/>
+                                                  style="width: 80%">
+                                            <Dropdown style="width: 120px" slot="append" :itemData="poolLiquidity"
+                                                      :change="computeRemoveLiquidity" v-model="poolLiquidityDropdown"/>
+                                        </el-input>
+
                                     </div>
                                     <div class="tab_div">
-                                        <el-input readonly v-model="poolLiquidityOutput" style="width: 77%"
+                                        <el-input readonly v-model="poolLiquidityOutput" style="width: 80%"
                                                   placeholder="Output"/>
                                     </div>
                                 </el-tab-pane>
@@ -498,13 +513,37 @@
         margin: 30px;
     }
 
+    .el-tabs__nav{
+        display: flex;
+        width: 100%;
+    }
+
+    #tab-0 {
+        flex: 1;
+    }
+    #tab-1 {
+        flex: 1;
+    }
+    #tab-2 {
+        flex: 1;
+    }
+
     .el-tabs__nav-scroll {
         overflow: hidden;
-        margin-left: 200px;
+        justify-content: center;
+    }
+
+    .el-tabs__nav-wrap{
+        width: 100%;
+    }
+
+    .el-tabs__nav-scroll {
+        display: flex;
+        width: 100%;
     }
 
     .el-tag {
-        width: 77% !important;
+        width: 80% !important;
         display: inline-block !important;
         height: auto !important;
         line-height: 18px !important;
