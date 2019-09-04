@@ -4,18 +4,18 @@
             <el-header><img alt="Vue logo"
                             src="https://www.irisnet.org/dist/irisnet_logo.png?4386a8f8710c9076ff3bb63fc78ef4e7">
             </el-header>
-            <el-main style="margin: 80px auto 0 auto;width: 700px;">
+            <el-main style="margin: 80px auto 0 auto;width: 750px;">
                 <el-tabs type="border-card" @tab-click="tabClick">
                     <el-tab-pane label="Swap" style="flex: 1">
                         <div class="tab_div">
-                            <el-input v-model="swapInput" style="width: 80%" @input="setOutputAmount">
+                            <el-input v-model="swapInput" style="width: 80%" @input="setOutputAmount" type="number" min="0" placeholder="0.0">
                                 <div slot="prepend" style="width: 50px">Input</div>
                                 <Dropdown v-model="swapInputDropdown" style="width: 100px" slot="append" :itemData="data"
                                           :change="changeInput"/>
                             </el-input>
                         </div>
                         <div class="tab_div">
-                            <el-input v-model="swapOutput" style="width: 80%" @input="setInputAmount">
+                            <el-input v-model="swapOutput" style="width: 80%" @input="setInputAmount" type="number" min="0" placeholder="0.0">
                                 <div slot="prepend" style="width: 50px">Output</div>
                                 <Dropdown v-model="swapOutputDropdown" style="width: 100px" slot="append" :itemData="data"
                                           :change="changeOutput"/>
@@ -33,21 +33,21 @@
                     </el-tab-pane>
                     <el-tab-pane label="Send" style="flex: 1">
                         <div class="tab_div">
-                            <el-input v-model="swapInput" style="width: 80%" @input="setOutputAmount">
+                            <el-input v-model="swapInput" style="width: 80%" @input="setOutputAmount" type="number" min="0" placeholder="0.0">
                                 <div slot="prepend" style="width: 50px">Input</div>
                                 <Dropdown v-model="swapInputDropdown" style="width: 100px" slot="append" :itemData="data"
                                           :change="changeInput"/>
                             </el-input>
                         </div>
                         <div class="tab_div">
-                            <el-input v-model="swapOutput" style="width: 80%" @input="setInputAmount">
+                            <el-input v-model="swapOutput" style="width: 80%" @input="setInputAmount" type="number" min="0" placeholder="0.0">
                                 <div slot="prepend" style="width: 50px">Output</div>
                                 <Dropdown style="width: 100px" slot="append" :itemData="data" :change="changeOutput"
                                           v-model="swapOutputDropdown"/>
                             </el-input>
                         </div>
                         <div class="tab_div">
-                            <el-input v-model="recipient" style="width: 80%" placeholder="Recipient Address">
+                            <el-input v-model="recipient" style="width: 80%" placeholder="iaa180z3q...">
                                 <div slot="prepend" style="width: 50px">Recipient</div>
                             </el-input>
                         </div>
@@ -65,12 +65,12 @@
                             <el-tabs @tab-click="poolTabClick" style="align-content: center">
                                 <el-tab-pane label="Add Liquidity">
                                     <div class="tab_div">
-                                        <el-input v-model="poolIrisAmt" style="width: 80%" @input="addLiquidityInput">
+                                        <el-input v-model="poolIrisAmt" style="width: 80%" @input="addLiquidityInput" type="number" min="0" placeholder="0.0">
                                             <Dropdown style="width: 100px" slot="append" :itemData="i_data" :change="emptyFun" disabled/>
                                         </el-input>
                                     </div>
                                     <div class="tab_div">
-                                        <el-input v-model="poolTokenAmt" style="width: 80%">
+                                        <el-input v-model="poolTokenAmt" style="width: 80%" type="number" min="0" placeholder="0.0">
                                             <Dropdown style="width: 100px" slot="append" :itemData="filterData"
                                                       :change="computeAddLiquidity" v-model="poolTokenDropdown"/>
                                         </el-input>
@@ -79,15 +79,15 @@
                                 <el-tab-pane label="Remove Liquidity">
                                     <div class="tab_div">
                                         <el-input v-model="poolLiquidityAmt" @input="removeLiquidityInput"
-                                                  style="width: 80%">
+                                                  style="width: 80%" type="number" min="0" placeholder="0.0">
                                             <Dropdown style="width: 120px" slot="append" :itemData="poolLiquidity"
                                                       :change="computeRemoveLiquidity" v-model="poolLiquidityDropdown"/>
                                         </el-input>
 
                                     </div>
                                     <div class="tab_div">
-                                        <el-input readonly v-model="poolLiquidityOutput" style="width: 80%"
-                                                  placeholder="Output"/>
+                                        <el-input disabled v-model="poolLiquidityOutput" style="width: 80%"
+                                                  placeholder="Withdraw Token"/>
                                     </div>
                                 </el-tab-pane>
                             </el-tabs>
@@ -139,22 +139,15 @@
                 data: [],
                 filterData: [],
                 decimals: {},
-                s_data: [{
-                    value: AddLiquidity,
-                    label: AddLiquidity,
-                }, {
-                    value: RemoveLiquidity,
-                    label: RemoveLiquidity,
-                }],
                 i_data: [{
                     value: 'iris-atto',
                     label: 'IRIS',
                 }],
                 msg: "",
                 tipType: "danger",
-                swapInput: 0,
+                swapInput: "",
                 swapInputDropdown: "",
-                swapOutput: 0,
+                swapOutput: "",
                 swapOutputDropdown: "",
                 recipient: "",
                 isBuyOrder: false,
@@ -162,10 +155,10 @@
                 methodDesc: "Add Liquidity",
                 poolTokenDropdown: "",
                 poolState: "",
-                poolIrisAmt: 0,
-                poolTokenAmt: 0,
+                poolIrisAmt: "",
+                poolTokenAmt: "",
                 poolLiquidity: [],
-                poolLiquidityAmt: 0,
+                poolLiquidityAmt: "",
                 deltaIrisAmt: 0,
                 deltaTokenAmt: 0,
                 mintLiquidity: 0,
@@ -207,8 +200,8 @@
                 });
             },
             tabClick() {
-                this.swapInput = 0;
-                this.swapOutput = 0;
+                this.swapInput = "";
+                this.swapOutput = "";
                 this.exchangeRate = "";
                 this.poolTabClick()
             },
@@ -221,10 +214,10 @@
             },
             poolTabClick(tab) {
                 this.poolState = "";
-                this.poolIrisAmt = 0;
-                this.poolTokenAmt = 0;
-                this.poolLiquidityAmt = 0;
-                this.poolLiquidityOutput = 0;
+                this.poolIrisAmt = "";
+                this.poolTokenAmt = "";
+                this.poolLiquidityAmt = "";
+                this.poolLiquidityOutput = "";
                 this.deltaIrisAmt = 0;
                 this.deltaTokenAmt = 0;
                 this.mintLiquidity = 0;
