@@ -28,7 +28,7 @@
                             </el-tag>
                         </div>
                         <div class="tab_div">
-                            <el-button type="primary" round style="width: 35%" @click="doSwap">Swap</el-button>
+                            <el-button type="primary" :disabled="!isActive" round style="width: 35%" @click="doSwap">Swap</el-button>
                         </div>
                     </el-tab-pane>
                     <el-tab-pane label="Send" style="flex: 1">
@@ -57,7 +57,7 @@
                             </el-tag>
                         </div>
                         <div class="tab_div">
-                            <el-button type="primary" round style="width: 35%" @click="doSwap">Swap</el-button>
+                            <el-button type="primary" :disabled="!isActive" round style="width: 35%" @click="doSwap">Swap</el-button>
                         </div>
                     </el-tab-pane>
                     <el-tab-pane label="Pool" style="flex: 1">
@@ -100,7 +100,7 @@
                             </el-tag>
                         </div>
                         <div class="tab_div">
-                            <el-button type="primary" style="width: 35%" round @click="doLiquidity">{{methodDesc}}</el-button>
+                            <el-button type="primary" style="width: 35%" :disabled="!isActive" round @click="doLiquidity">{{methodDesc}}</el-button>
                         </div>
                     </el-tab-pane>
                     <div class="tab_div" v-if="msg !== ''">
@@ -164,6 +164,7 @@
                 mintLiquidity: 0,
                 poolLiquidityOutput: "",
                 poolLiquidityDropdown: "",
+                isActive: true,
             }
         },
         watch: {
@@ -195,6 +196,7 @@
                             this.filterData.push(option);
                         }
                     });
+                    this.isActive = swap.ledger.isActive()
                 }).catch(() => {
                     this.showError("init page error!")
                 });
@@ -203,6 +205,7 @@
                 this.swapInput = "";
                 this.swapOutput = "";
                 this.exchangeRate = "";
+                this.isActive = false;
                 this.poolTabClick()
             },
             showError(message) {
@@ -288,6 +291,7 @@
 
                 }
                 this.clearError();
+                this.isActive = swap.ledger.isActive()
             },
             setOutputAmount() {
                 this.isBuyOrder = false;
@@ -327,6 +331,7 @@
                     });
                 }
                 this.clearError();
+                this.isActive = swap.ledger.isActive()
             },
             showRate(inputAmt, inputDenom, outputAmt, outputDenom) {
                 if (!Number.isInteger(inputAmt) || !Number.isInteger(outputAmt)
@@ -390,6 +395,7 @@
                     let deltaToken = (deltaIris / iris.amount) * token.amount;
                     this.poolTokenAmt = Token.toFix(deltaToken / Math.pow(10, this.decimals[tokenUdenom]));
                     this.mintLiquidity = Token.toFix(((data.liquidity.amount * deltaIris)/iris.amount + 1)/Math.pow(10, this.decimals[irisUdenom]))
+                    this.isActive = swap.ledger.isActive()
                 }).catch(() => {
                     this.showError(`liquidity pool ${denom} not exist !`);
                 });
@@ -434,6 +440,7 @@
                         rate: `1 ${tokenMainDenom} = ${Token.toFix(reserveIrisAmt / reserveTokenAmt)} ${irisMainDenom}`,
                         size: `${reserveIrisAmt} ${irisMainDenom} + ${reserveTokenAmt} ${tokenMainDenom}`,
                     };
+                    parent.isActive = swap.ledger.isActive()
                 }).catch(() => {
                     this.showError(`liquidity pool ${denom} not exist !`);
                 });

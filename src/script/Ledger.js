@@ -26,6 +26,10 @@ export class Ledger{
             return response.signature;
         });
     }
+
+    isActive(){
+        return this.app !== null
+    }
 }
 
 function _createLedgerApp(client,callback) {
