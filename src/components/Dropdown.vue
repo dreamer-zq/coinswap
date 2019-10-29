@@ -1,5 +1,7 @@
 <template>
-  <el-select v-model="defaultValue" no-match-text="No Match" filterable :placeholder="placeholder" :disabled="disabled" @change="change">
+  <el-select v-model="defaultValue" no-match-text="No Match"
+             no-data-text="No Data"
+             filterable placeholder="Select" :disabled="disabled" @change="change">
     <el-option
             v-for="item in itemData"
             :key="item.value"
