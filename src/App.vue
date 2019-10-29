@@ -1,8 +1,7 @@
 <template>
     <div id="app">
         <el-container>
-            <el-header><img alt="Vue logo"
-                            src="https://www.irisnet.org/dist/irisnet_logo.png?4386a8f8710c9076ff3bb63fc78ef4e7">
+            <el-header><img style="width: 400px; padding-top: 20px;" src="./assets/irisnet.png">
             </el-header>
             <el-main style="margin: 80px auto 0 auto;width: 750px;">
                 <el-tabs type="border-card" @tab-click="tabClick">
