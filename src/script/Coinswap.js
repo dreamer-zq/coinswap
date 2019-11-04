@@ -9,7 +9,7 @@ const slippageRate = 0.01;
 export class CoinSwap {
     constructor(client) {
         this.client = client;
-        this.ledger = new Ledger(client)
+        this.ledger = new Ledger()
     }
 
     sendSwapTx(input, output,recipient, isBuyOrder) {

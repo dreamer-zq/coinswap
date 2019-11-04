@@ -1,13 +1,17 @@
 import TransportWebUSB from '@ledgerhq/hw-transport-webusb';
+import {IrisClient} from 'sdk-js'
 
 const path = [44, 118, 0, 0, 0];
+let app = null;
+
+document.body.addEventListener("click", async () => {
+    const transport = await TransportWebUSB.create();
+    app = await IrisClient.getLedger().create(transport)
+});
 
 export class Ledger{
-    constructor(client){
-        this.app = null;
-        _createLedgerApp(client,ledgerApp => {
-            this.app = ledgerApp;
-        });
+    constructor(){
+        this.app = app;
     }
 
     getAddressAndPubKey() {
@@ -30,12 +34,4 @@ export class Ledger{
     isActive(){
         return this.app !== null
     }
-}
-
-function _createLedgerApp(client,callback) {
-    TransportWebUSB.create().then(transport =>{
-        client.getLedger().create(transport).then(app => {
-            callback(app)
-        });
-    });
 }
