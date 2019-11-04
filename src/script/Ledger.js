@@ -27,9 +27,16 @@ export class Ledger{
 }
 
 function _createLedgerApp(callback) {
-    TransportWebUSB.create().then(transport =>{
-        crypto.getLedger().create(transport).then(app => {
-            callback(app)
-        });
-    });
+    let appCreate = async () => {
+        let transport = await TransportWebUSB.create();
+        return await crypto.getLedger().create(transport)
+    };
+    let app = null;
+    let timer = setInterval(async() =>{
+        app = await appCreate();
+        if(app !== null){
+            clearInterval(timer);
+            callback(app);
+        }
+    },2000);
 }
