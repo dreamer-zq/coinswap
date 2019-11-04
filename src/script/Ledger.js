@@ -1,12 +1,12 @@
 import TransportWebUSB from '@ledgerhq/hw-transport-webusb';
-import {IrisClient} from 'sdk-js'
+import * as crypto from "iris-crypto"
 
 const path = [44, 118, 0, 0, 0];
 let app = null;
 
 document.body.addEventListener("click", async () => {
     const transport = await TransportWebUSB.create();
-    app = await IrisClient.getLedger().create(transport)
+    app = await crypto.getLedger().create(transport)
 });
 
 export class Ledger{
