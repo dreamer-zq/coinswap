@@ -375,7 +375,8 @@
                     let irisMainDenom = Token.getMainDenom(irisUdenom);
 
                     if (data.liquidity.amount === "0") {
-                        this.poolState.size = `0 ${irisMainDenom} + 0 ${tokenMainDenom}`;
+                        this.poolState.size = ` ${this.swapInput} ${irisMainDenom} + ${this.swapOutput} ${tokenMainDenom}`;
+                        this.isActive = swap.ledger.isActive();
                         return;
                     }
 
@@ -476,6 +477,9 @@
                   let exactIrisAmt = this.poolIrisAmt * Math.pow(10, this.decimals["uni:iris"]);
                   let mintLiquidity = this.mintLiquidity * Math.pow(10, this.decimals["uni:iris"]);
                   let isCreate = this.poolState.rate === '';
+                  if (isCreate){
+                      mintLiquidity = exactIrisAmt
+                  }
                   swap.sendAddLiquidityTx(maxToken,exactIrisAmt,mintLiquidity,isCreate).then(result => {
                       this.tipType = "success";
                       this.msg = `${result.hash}`;
