@@ -14,11 +14,17 @@ export class Ledger{
     getAddressAndPubKey() {
         return this.app.getAddressAndPubKey(path,"faa").then((result) => {
             return {addr :result.bech32_address,pubKey:result.compressed_pk};
+        }).catch (() => {
+            this.app = null;
+            throw new Error("connect ledger failed,please reconnection ledger")
         });
     }
     signTx(msg) {
         return this.app.sign(path, msg).then((response) => {
             return response.signature;
+        }).catch (() => {
+            this.app = null;
+            throw new Error("connect ledger failed,please reconnection ledger")
         });
     }
     isActive(){
@@ -27,16 +33,25 @@ export class Ledger{
 }
 
 function _createLedgerApp(callback) {
-    let appCreate = async () => {
-        let transport = await TransportWebUSB.create();
-        return await crypto.getLedger().create(transport)
+    let appCreate = (okFun,failFun) => {
+        TransportWebUSB.create().then((transport) => {
+            crypto.getLedger().create(transport).then((app) =>{
+                okFun(app)
+            })
+        }).catch ((err) => {
+            failFun(err)
+        })
     };
-    let app = null;
     let timer = setInterval(async() =>{
-        app = await appCreate();
-        if(app !== null){
-            clearInterval(timer);
-            callback(app);
-        }
-    },2000);
+        appCreate((app) =>{
+            if(app !== null){
+                clearInterval(timer);
+                callback(app);
+            }
+        },(err) =>{
+            if(err && err.name === "TransportOpenUserCancelled"){
+                clearInterval(timer);
+            }
+        });
+    },1000);
 }

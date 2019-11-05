@@ -89,8 +89,8 @@ export class CoinSwap {
             }).catch(e => {
                 throw e;
             });
-        }).catch(e => {
-            throw e;
+        }).catch(() => {
+            throw new Error("connect ledger failed,please reconnection ledger")
         });
     }
 
