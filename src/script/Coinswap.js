@@ -134,7 +134,7 @@ export class CoinSwap {
 export class Token {
 
     static getUniDenom(tokenId){
-        return `uni:${tokenId}`
+        return `iris:${tokenId}`
     }
 
     static getMainDenom(denom) {
